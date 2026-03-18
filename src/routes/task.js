@@ -1,13 +1,14 @@
 const express = require("express")
-const Task = require("../controller/index")
+const Tasks = require("../controller/db_controller")
 
-const task = new Task()
+const task = new Tasks()
 const router = express.Router()
 
 router.get('/', async (req, res, next) => {
     try {
-        const taskArray = await task.readAll()
-        res.status(200).json(taskArray)
+        const allTasks = await task.getTask()
+        if (allTasks.length === 0) res.status(404).json({ message: `No tasks found!` });
+        res.status(200).json(allTasks)
     } catch (err) {
         next(err)
     }
@@ -44,8 +45,8 @@ router.delete('/', async (req, res, next) => {
     if (!taskId) {
         res.status(404).json({ message: "No taskId provided." })
     }
-    await task.deleteTask(taskId)
-    res.status(204).json({ message: `Task deleted Successfully with ID:${taskId}` })
+    const deletedTask = await task.deleteTask(taskId)
+    res.status(204).json(deletedTask)
 })
 
 module.exports = router;
